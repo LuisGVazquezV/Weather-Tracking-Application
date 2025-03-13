@@ -1,8 +1,10 @@
-import React, { useState } from "react";
-import { useAuth } from "./AuthContext";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "./auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { AppBar, Toolbar, Typography, Button, Container, Grid, Card, CardContent, Chip } from "@mui/material";
+import { AppBar, Toolbar, Typography, Button, Container, Grid, Card, CardContent, Chip, CircularProgress, Stack, useTheme, useMediaQuery } from "@mui/material";
+import { toast } from 'react-toastify';
+import ClearIcon from '@mui/icons-material/Clear';
 
 const cityOptions = [
     "New York", "London", "Tokyo", "Paris", "Berlin",
@@ -15,6 +17,23 @@ function Home() {
     const [selectedCities, setSelectedCities] = useState([]);
     const [weatherData, setWeatherData] = useState([]);
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    // Add responsive breakpoints
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+
+    useEffect(() => {
+        // Check if user is authenticated
+        if (!currentUser) {
+            navigate('/login');
+            return;
+        }
+
+        // Clear any existing errors
+        setError("");
+    }, [currentUser, navigate]);
 
     const toggleCitySelection = (city) => {
         setSelectedCities((prev) =>
@@ -22,28 +41,48 @@ function Home() {
         );
     };
 
+    const clearAllSelections = () => {
+        setSelectedCities([]);
+        setWeatherData([]);
+        setError("");
+        toast.info("All selections cleared");
+    };
+
     const fetchWeather = async () => {
         if (selectedCities.length < 3) {
+            toast.error("Please select at least 3 cities.");
             setError("Please select at least 3 cities.");
             return;
         }
 
         setError("");
+        setLoading(true);
         try {
             const token = await currentUser.getIdToken();
             const response = await axios.get(`http://localhost:8000/weather?cities=${selectedCities.join(",")}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setWeatherData(response.data);
+            toast.success("Weather data fetched successfully!");
         } catch (err) {
-            setError("Error fetching weather data");
-            console.error(err);
+            console.error("Error fetching weather data:", err);
+            const errorMessage = err.response?.data?.message || err.message || "Error fetching weather data";
+            setError(errorMessage);
+            toast.error(errorMessage);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleLogout = async () => {
-        await logout();
-        navigate("/login");
+        try {
+            await logout();
+            toast.success("Logged out successfully!");
+            navigate("/login");
+        } catch (error) {
+            console.error("Logout error:", error);
+            toast.error("Failed to logout. Please try again.");
+        }
     };
 
     const getRecommendations = (weather) => {
@@ -61,28 +100,46 @@ function Home() {
         return "🌤️ Enjoy your day!";
     };
 
+    if (!currentUser) {
+        return <CircularProgress />;
+    }
+
     return (
-        <Container>
+        <Container maxWidth="lg" sx={{ mt: 4 }}>
             {/* Navbar */}
-            <AppBar position="static">
+            <AppBar position="fixed">
                 <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
-                    <Typography variant="h6">Weather Tracker</Typography>
-                    <div>
-                        <Typography variant="body1" style={{ marginRight: "20px", display: "inline" }}>
+                    <Typography variant="h6" noWrap>Weather Tracker</Typography>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                mr: 2,
+                                display: { xs: 'none', sm: 'block' }
+                            }}
+                        >
                             👤 {currentUser?.email}
                         </Typography>
-                        <Button variant="contained" color="error" onClick={handleLogout}>
+                        <Button
+                            variant="contained"
+                            color="error"
+                            onClick={handleLogout}
+                            size={isMobile ? "small" : "medium"}
+                        >
                             Logout
                         </Button>
                     </div>
                 </Toolbar>
             </AppBar>
 
+            {/* Main Content - Add toolbar spacing */}
+            <Toolbar />
+
             {/* City Selection */}
-            <Typography variant="h5" style={{ margin: "20px 0" }}>
+            <Typography variant="h5" sx={{ my: 3 }}>
                 Select at least 3 cities:
             </Typography>
-            <Grid container spacing={2} style={{ marginBottom: "20px" }}>
+            <Grid container spacing={isMobile ? 1 : 2} sx={{ mb: 3 }}>
                 {cityOptions.map((city) => (
                     <Grid item key={city}>
                         <Chip
@@ -90,43 +147,121 @@ function Home() {
                             onClick={() => toggleCitySelection(city)}
                             color={selectedCities.includes(city) ? "primary" : "default"}
                             clickable
+                            size={isMobile ? "small" : "medium"}
                         />
                     </Grid>
                 ))}
             </Grid>
 
-            <Button variant="contained" color="primary" onClick={fetchWeather} style={{ marginBottom: "20px" }}>
-                Get Weather
-            </Button>
+            <Stack
+                direction={isMobile ? "column" : "row"}
+                spacing={2}
+                sx={{
+                    mb: 3,
+                    width: isMobile ? '100%' : 'auto'
+                }}
+            >
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={fetchWeather}
+                    disabled={loading || selectedCities.length < 3}
+                    size={isMobile ? "large" : "medium"}
+                    fullWidth={isMobile}
+                    sx={{
+                        minWidth: { xs: '100%', sm: '200px' }
+                    }}
+                >
+                    {loading ? <CircularProgress size={24} color="inherit" /> : "Get Weather"}
+                </Button>
+                <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={clearAllSelections}
+                    disabled={loading || selectedCities.length === 0}
+                    startIcon={<ClearIcon />}
+                    size={isMobile ? "large" : "medium"}
+                    fullWidth={isMobile}
+                    sx={{
+                        minWidth: { xs: '100%', sm: '200px' }
+                    }}
+                >
+                    Clear All
+                </Button>
+            </Stack>
 
-            {error && <Typography color="error">{error}</Typography>}
+            {error && (
+                <Typography color="error" sx={{ mb: 3 }}>
+                    {error}
+                </Typography>
+            )}
 
             {/* Weather Data */}
-            <Grid container spacing={3}>
+            <Grid container spacing={isMobile ? 2 : 3}>
                 {weatherData.map((weather, index) => (
-                    <Grid item xs={12} md={4} key={index}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6">{weather.name || weather.city}</Typography>
+                    <Grid
+                        item
+                        xs={12}
+                        sm={6}
+                        md={4}
+                        key={index}
+                    >
+                        <Card
+                            elevation={3}
+                            sx={{
+                                height: '100%',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                transition: 'transform 0.2s ease-in-out',
+                                '&:hover': {
+                                    transform: 'translateY(-5px)'
+                                }
+                            }}
+                        >
+                            <CardContent sx={{ flexGrow: 1 }}>
+                                <Typography variant={isMobile ? "h6" : "h5"} gutterBottom>
+                                    {weather.name || weather.city}
+                                </Typography>
                                 {weather.error ? (
                                     <Typography color="error">{weather.error}</Typography>
                                 ) : (
-                                    <>
-                                        <Typography>🌡️ Temperature: {weather.main.temp}°C</Typography>
-                                        <Typography>💧 Humidity: {weather.main.humidity}%</Typography>
-                                        <Typography>☁️ Conditions: {weather.weather[0].description}</Typography>
-                                        <Typography>🌬️ Wind Speed: {weather.wind.speed} m/s</Typography>
-                                        <Typography>🧭 Pressure: {weather.main.pressure} hPa</Typography>
-                                        <Typography>👁️ Visibility: {weather.visibility / 1000} km</Typography>
-                                        <Typography>🌅 Sunrise: {new Date(weather.sys.sunrise * 1000).toLocaleTimeString()}</Typography>
-                                        <Typography>🌇 Sunset: {new Date(weather.sys.sunset * 1000).toLocaleTimeString()}</Typography>
-                                    </>
+                                    <Stack spacing={1}>
+                                        <Typography variant={isMobile ? "body2" : "body1"}>
+                                            🌡️ Temperature: {weather.main.temp}°C
+                                        </Typography>
+                                        <Typography variant={isMobile ? "body2" : "body1"}>
+                                            💧 Humidity: {weather.main.humidity}%
+                                        </Typography>
+                                        <Typography variant={isMobile ? "body2" : "body1"}>
+                                            ☁️ Conditions: {weather.weather[0].description}
+                                        </Typography>
+                                        <Typography variant={isMobile ? "body2" : "body1"}>
+                                            🌬️ Wind Speed: {weather.wind.speed} m/s
+                                        </Typography>
+                                        <Typography variant={isMobile ? "body2" : "body1"}>
+                                            🧭 Pressure: {weather.main.pressure} hPa
+                                        </Typography>
+                                        <Typography variant={isMobile ? "body2" : "body1"}>
+                                            👁️ Visibility: {weather.visibility / 1000} km
+                                        </Typography>
+                                        <Typography variant={isMobile ? "body2" : "body1"}>
+                                            🌅 Sunrise: {new Date(weather.sys.sunrise * 1000).toLocaleTimeString()}
+                                        </Typography>
+                                        <Typography variant={isMobile ? "body2" : "body1"}>
+                                            🌇 Sunset: {new Date(weather.sys.sunset * 1000).toLocaleTimeString()}
+                                        </Typography>
+                                    </Stack>
                                 )}
 
                                 {/* Floating Recommendation Panel */}
                                 <div style={{
-                                    background: "#ffcc00", color: "#333", padding: "5px 10px",
-                                    borderRadius: "5px", fontSize: "14px", marginTop: "10px"
+                                    background: "#ffcc00",
+                                    color: "#333",
+                                    padding: isMobile ? "8px" : "10px",
+                                    borderRadius: "5px",
+                                    marginTop: "10px",
+                                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                                    fontSize: isMobile ? "14px" : "16px"
                                 }}>
                                     {getRecommendations(weather)}
                                 </div>

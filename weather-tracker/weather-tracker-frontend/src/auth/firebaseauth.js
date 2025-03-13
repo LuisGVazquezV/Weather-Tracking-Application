@@ -7,7 +7,7 @@ import {
     signOut,
     onAuthStateChanged
 } from "firebase/auth";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -22,11 +22,16 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const analytics = getAnalytics(app);
+
+// Initialize Analytics only if supported (not in development)
+let analytics = null;
+isSupported().then(yes => yes && (analytics = getAnalytics(app)));
+
 export {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     signOut,
-    onAuthStateChanged
+    onAuthStateChanged,
+    analytics
 };
 export default app;

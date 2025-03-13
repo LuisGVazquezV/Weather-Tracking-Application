@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from './AuthContext';
+import { useAuth } from './auth/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import {
     Container,
@@ -10,6 +10,7 @@ import {
     Box,
     Alert
 } from '@mui/material';
+import { toast } from 'react-toastify';
 
 function Register() {
     const [email, setEmail] = useState('');
@@ -24,16 +25,21 @@ function Register() {
         e.preventDefault();
 
         if (password !== confirmPassword) {
-            return setError('Passwords do not match');
+            setError('Passwords do not match');
+            toast.error('Passwords do not match');
+            return;
         }
 
         try {
             setError('');
             setLoading(true);
             await signup(email, password);
+            toast.success('Account created successfully!');
             navigate('/');
         } catch (error) {
-            setError('Failed to create an account: ' + error.message);
+            console.error('Registration error:', error);
+            setError('Failed to create an account: ' + (error.message || 'Please try again'));
+            toast.error('Failed to create account');
         }
         setLoading(false);
     }
@@ -57,6 +63,7 @@ function Register() {
                         autoFocus
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        disabled={loading}
                     />
                     <TextField
                         margin="normal"
@@ -69,6 +76,7 @@ function Register() {
                         autoComplete="new-password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        disabled={loading}
                     />
                     <TextField
                         margin="normal"
@@ -81,6 +89,7 @@ function Register() {
                         autoComplete="new-password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
+                        disabled={loading}
                     />
                     <Button
                         type="submit"
@@ -89,7 +98,7 @@ function Register() {
                         sx={{ mt: 3, mb: 2 }}
                         disabled={loading}
                     >
-                        Register
+                        {loading ? 'Creating Account...' : 'Register'}
                     </Button>
                     <Box sx={{ textAlign: 'center' }}>
                         <Typography variant="body2">

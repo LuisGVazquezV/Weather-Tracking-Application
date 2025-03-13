@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from './AuthContext';
+import { useAuth } from './auth/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import {
     Container,
@@ -10,6 +10,7 @@ import {
     Box,
     Alert
 } from '@mui/material';
+import { toast } from 'react-toastify';
 
 function Login() {
     const [email, setEmail] = useState('');
@@ -26,9 +27,12 @@ function Login() {
             setError('');
             setLoading(true);
             await login(email, password);
+            toast.success('Successfully logged in!');
             navigate('/');
         } catch (error) {
-            setError('Failed to sign in: ' + error.message);
+            console.error('Login error:', error);
+            setError('Failed to sign in: ' + (error.message || 'Please try again'));
+            toast.error('Failed to sign in');
         }
         setLoading(false);
     }
@@ -52,6 +56,7 @@ function Login() {
                         autoFocus
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        disabled={loading}
                     />
                     <TextField
                         margin="normal"
@@ -64,6 +69,7 @@ function Login() {
                         autoComplete="current-password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        disabled={loading}
                     />
                     <Button
                         type="submit"
@@ -72,7 +78,7 @@ function Login() {
                         sx={{ mt: 3, mb: 2 }}
                         disabled={loading}
                     >
-                        Login
+                        {loading ? 'Logging in...' : 'Login'}
                     </Button>
                     <Box sx={{ textAlign: 'center' }}>
                         <Typography variant="body2">
