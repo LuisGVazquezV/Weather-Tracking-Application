@@ -43,13 +43,13 @@ python3 -m venv venv
 
 6. Acitve the `venv` and run it using `uvicorn main:app --host 0.0.0.0 --port 8000 --reload`
 ```bash
-venv\Scripts\activate
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+venv\Scripts\activate #Active
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload # Run
 ```
 
-7. Run the app.py to collect metrics
+7. Run the app.py to collect metrics in a new terminal (`Command Prompt`).
 ```bash
-python app.py
+python app.py # Run 
 ```
 
 8. In `Prometheus` and `Alertmanager` copy the yaml files content
