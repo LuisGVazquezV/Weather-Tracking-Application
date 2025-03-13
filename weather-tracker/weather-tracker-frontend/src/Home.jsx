@@ -19,10 +19,9 @@ function Home() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    // Add responsive breakpoints
+    // Add responsive breakpoint
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
     useEffect(() => {
         // Check if user is authenticated
@@ -101,11 +100,15 @@ function Home() {
     };
 
     if (!currentUser) {
-        return <CircularProgress />;
+        return (
+            <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <CircularProgress />
+            </Container>
+        );
     }
 
     return (
-        <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Container maxWidth="lg" sx={{ mt: 4, pb: 4 }}>
             {/* Navbar */}
             <AppBar position="fixed">
                 <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
@@ -137,7 +140,7 @@ function Home() {
 
             {/* City Selection */}
             <Typography variant="h5" sx={{ my: 3 }}>
-                Select at least 3 cities:
+                Select at least 3 cities: {selectedCities.length > 0 && `(${selectedCities.length} selected)`}
             </Typography>
             <Grid container spacing={isMobile ? 1 : 2} sx={{ mb: 3 }}>
                 {cityOptions.map((city) => (
@@ -186,7 +189,7 @@ function Home() {
                         minWidth: { xs: '100%', sm: '200px' }
                     }}
                 >
-                    Clear All
+                    Clear All ({selectedCities.length})
                 </Button>
             </Stack>
 
@@ -212,9 +215,10 @@ function Home() {
                                 height: '100%',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                transition: 'transform 0.2s ease-in-out',
+                                transition: 'all 0.2s ease-in-out',
                                 '&:hover': {
-                                    transform: 'translateY(-5px)'
+                                    transform: 'translateY(-5px)',
+                                    boxShadow: (theme) => theme.shadows[6]
                                 }
                             }}
                         >
