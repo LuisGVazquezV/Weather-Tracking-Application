@@ -34,7 +34,7 @@ npm run dev # to run application
     - navigate to firebase `Project Settings`.
     - Then `Service accounts`.
     - Generate new private key `Node.js` copy and paste to `serviceAccountKey.json`
-    - In the .env `WEATHER_API_KEY=YOUR_API_KEY`
+    - In the .env `WEATHER_API_KEY=YOUR_API_KEY` from Open Weather.
 
 5. Create a new terminal in VS code (`Command prompt`) to create Virtual Enviroment.
 ```bash
