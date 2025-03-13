@@ -56,7 +56,7 @@ python app.py # Run
 
 9. Run both `prometheus.exe` and `alertmanager.exe`
 
-10. 
+10. Run the local hosts.
  - Access the main application at http://localhost:5173
  - Access Prometheus at http://localhost:9090
  - Access Alertmanager at http://localhost:9093
