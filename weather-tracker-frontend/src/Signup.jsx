@@ -91,8 +91,8 @@ const Signup = () => {
             <CloudIcon sx={{ fontSize: 50, color: "#2196F3" }} />
         </Box>
           <Typography variant = "h4" fontWeight="bold" align="center">Weather Tracker</Typography> 
-          <Typography variant="h5" align="center">
-            Sign Up
+          <Typography variant="h5" fontWeight="bold" align="center">
+            Sign-Up
           </Typography>
           {error && (
             <Typography color="error" align="center">
@@ -128,7 +128,7 @@ const Signup = () => {
           </Box>
           <Divider>or</Divider>
           <Typography align="center">
-            Already have an account? <Link href="/login">Login</Link>
+            Already have an account? <Link href="/login">Log In</Link>
           </Typography>
         </StyledCard>
       </Stack>
