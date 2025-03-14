@@ -22,7 +22,7 @@ weather_sunset = Gauge("weather_sunset", "Sunset timestamp (Unix)", ["city"], re
 weather_uv_index = Gauge("weather_uv_index", "UV index", ["city"], registry=registry)  # Requires One Call API
 
 # OpenWeather API Config
-API_KEY = "651dc926e8049aec6b9297fa058d9948"
+API_KEY = ""
 BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
 UVI_URL = "http://api.openweathermap.org/data/2.5/uvi"
 
