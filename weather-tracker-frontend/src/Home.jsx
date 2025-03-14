@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { AppBar, Toolbar, Typography, Button, Container, Grid, Card, CardContent, Chip, TextField, ThemeProvider, CssBaseline, Switch, Box} from "@mui/material";
+import { AppBar, Toolbar, Typography, Button, Container, Grid, Card, CardContent, Chip, TextField, ThemeProvider, CssBaseline, Switch, Box, CardMedia} from "@mui/material";
 import { createTheme } from "@mui/material/styles";
 import { WbSunny, DarkMode } from "@mui/icons-material";
-import { FaSun, FaCloudRain, FaSnowflake, FaWind } from 'react-icons/fa';
+import { FaCloud, FaSun, FaCloudRain, FaSnowflake, FaWind } from 'react-icons/fa';
 
 
 const getWeatherIcon = (condition) => {
@@ -24,11 +24,23 @@ const getWeatherIcon = (condition) => {
   };
 
 
-const cityOptions = [
-    "New York", "London", "Tokyo", "Paris",
-    "Dubai", "Sydney", "Mumbai", "Toronto", 
-    "San Francisco", "Houston", "Beijing", 
-    "Los Angeles", "Bangkok", "Alaska", "Washington DC"
+  const cityOptions = [
+    { name: "New York", image: "/images/cities/new-york.jpg" },
+    { name: "London", image: "/images/cities/london.jpg" },
+    { name: "Tokyo", image: "/images/cities/tokyo.jpg" },
+    { name: "Paris", image: "/images/cities/paris.jpg" },
+    { name: "Dubai", image: "/images/cities/dubai.jpg" },
+    { name: "Sydney", image: "/images/cities/sydney.jpg" },
+    { name: "Mumbai", image: "/images/cities/mumbai.jpg" },
+    { name: "Toronto", image: "/images/cities/toronto.jpg" },
+    { name: "San Francisco", image: "/images/cities/san-francisco.jpg" },
+    { name: "Houston", image: "/images/cities/houston.jpg" },
+    { name: "Beijing", image: "/images/cities/beijing.jpg" },
+    { name: "Los Angeles", image: "/images/cities/los-angeles.jpg" },
+    { name: "Bangkok", image: "/images/cities/bangkok.jpg" },
+    { name: "Alaska", image: "/images/cities/alaska.jpg" },
+    { name: "Washington DC", image: "/images/cities/washington-dc.jpg" },
+    { name: "Seoul", image: "/images/cities/seoul.jpg"},
 ];
 
 function Home() {
@@ -40,6 +52,11 @@ function Home() {
     const [error, setError] = useState("");
     const [cityInput, setCityInput] = useState("");
     const [temperatureUnit, setTemperatureUnit] = useState("metric");
+    const [showMore, setShowMore] = useState(false);
+
+    const toggleShowMore = () => {
+        setShowMore(!showMore);
+      };
 
     const theme = createTheme({
         palette: {
@@ -110,43 +127,137 @@ function Home() {
       const getRecommendations = (weather) => {
         const temp = weather.main.temp;
         const wind = weather.wind.speed;
-      
+        const humidity = weather.main.humidity;
+        const uvi = weather.uvi; 
+        const description = weather.weather[0].description.toLowerCase();
+    
+        
+        const iconStyle = {
+            width: "24px",       
+            height: "24px",      
+            verticalAlign: "middle",  
+            marginRight: "8px"   
+        };
+    
         // Temperature-based recommendations
         if (temp < 5) return (
-          <div>
-            <FaSnowflake style={iconStyle} /> Wear warm clothes, it's freezing!
-          </div>
+            <div>
+                <img src="/snowflake.svg" alt="snowflake" style={iconStyle} /> 
+                Brrr! It’s freezing! Layer up and stay cozy indoors, or go make a snowman!
+                <img src="/snowBoots.svg" alt="snow boots" style={iconStyle} />
+            </div>
         );
         if (temp >= 5 && temp <= 15) return (
-          <div>
-            <FaCloudRain style={iconStyle} /> A light jacket is recommended.
-          </div>
+            <div>
+                <img src="/cloudRain.svg" alt="cloud rain" style={iconStyle} />
+                It’s chilly, so a warm jacket and scarf are your best friends today.
+                <img src="/jacket.svg" alt="jacket" style={iconStyle} />
+                <img src="/scarf.svg" alt="scarf" style={iconStyle} />
+            </div>
         );
         if (temp > 15 && temp <= 30) return (
-          <div>
-            <FaSun style={iconStyle} /> Enjoy the weather! Maybe wear light clothing.
-          </div>
+            <div>
+                <img src="/sun.svg" alt="sun" style={iconStyle} />
+                Perfect weather for a walk in the park or outdoor activities. Don't forget sunscreen!
+                <img src="/sunscreen.svg" alt="sunscreen" style={iconStyle} />
+            </div>
         );
         if (temp > 30) return (
-          <div>
-            <FaSun style={iconStyle} /> Stay hydrated, it's hot! Wear something cool.
-          </div>
+            <div>
+                <img src="/sunHot.svg" alt="hot sun" style={iconStyle} />
+                It’s sweltering out there! Stay hydrated, wear light clothing, and stay cool in the shade.
+                <img src="/waterBottle.svg" alt="water bottle" style={iconStyle} />
+                <img src="/hat.svg" alt="hat" style={iconStyle} />
+            </div>
         );
-      
+    
         // Wind-based recommendations
         if (wind > 10) return (
-          <div>
-            <FaWind style={iconStyle} />Strong winds! Secure loose items.
-          </div>
+            <div>
+                <img src="/wind.svg" alt="wind" style={iconStyle} />
+                Hold onto your hat – it’s windy! Secure any loose items and brace for gusty winds.
+                <img src="/hatWind.svg" alt="wind hat" style={iconStyle} />
+            </div>
         );
-      
+    
+        // Humidity-based recommendations
+        if (humidity > 80) return (
+            <div>
+                <img src="/humidity.svg" alt="humidity" style={iconStyle} />
+                Humid and sticky today. You might want to stay inside or wear something breathable.
+                <img src="/breathableClothing.svg" alt="breathable clothing" style={iconStyle} />
+            </div>
+        );
+        if (humidity < 20) return (
+            <div>
+                <img src="/sunDry.svg" alt="dry sun" style={iconStyle} />
+                It’s dry out there! Drink plenty of water and consider using a moisturizer.
+                <img src="/waterBottle.svg" alt="water bottle" style={iconStyle} />
+                <img src="/moisturizer.svg" alt="moisturizer" style={iconStyle} />
+            </div>
+        );
+    
+        // UV index-based recommendations
+        if (uvi > 8) return (
+            <div>
+                <img src="/sunHighUV.svg" alt="high UV" style={iconStyle} />
+                High UV index – wear sunscreen, sunglasses, and a hat if you’re stepping out!
+                <img src="/sunscreen.svg" alt="sunscreen" style={iconStyle} />
+                <img src="/sunglasses.svg" alt="sunglasses" style={iconStyle} />
+            </div>
+        );
+        if (uvi > 5) return (
+            <div>
+                <img src="/sunModerateUV.svg" alt="moderate UV" style={iconStyle} />
+                Moderate UV today. You’ll be fine without sunscreen for short periods, but better safe than sorry!
+                <img src="/sunscreen.svg" alt="sunscreen" style={iconStyle} />
+            </div>
+        );
+        if (uvi <= 5) return (
+            <div>
+                <img src="/cloudLowUV.svg" alt="low UV" style={iconStyle} />
+                Low UV today. You’re good to go without sunscreen for short periods outdoors.
+            </div>
+        );
+    
+        // Additional conditions (Thunderstorm, Fog, etc.)
+        if (description.includes("thunderstorm")) return (
+            <div>
+                <img src="/thunderstorm.svg" alt="thunderstorm" style={iconStyle} />
+                A thunderstorm is expected! Stay indoors and stay safe.
+                <img src="/lightning.svg" alt="lightning" style={iconStyle} />
+            </div>
+        );
+        if (description.includes("fog") || description.includes("mist")) return (
+            <div>
+                <img src="/fog.svg" alt="fog" style={iconStyle} />
+                Visibility is low. Drive carefully and avoid unnecessary travel.
+                <img src="/fogLights.svg" alt="fog lights" style={iconStyle} />
+            </div>
+        );
+        if (description.includes("rain")) return (
+            <div>
+                <img src="/rain.svg" alt="rain" style={iconStyle} />
+                It’s raining. Don’t forget your umbrella, and stay dry!
+                <img src="/umbrella.svg" alt="umbrella" style={iconStyle} />
+            </div>
+        );
+        if (description.includes("cloud")) return (
+            <div>
+                <img src="/cloud.svg" alt="cloudy" style={iconStyle} />
+                It’s cloudy but mild. A perfect day for a cozy indoor activity or light outdoor walk.
+            </div>
+        );
+    
         // Default recommendation
         return (
-          <div>
-            <FaSun style={iconStyle} /> Enjoy your day! No need for extra layers.
-          </div>
+            <div>
+                <img src="/sun.svg" alt="sun" style={iconStyle} />
+                Nice and balanced weather. Go for a hike, picnic, or just relax outdoors!
+                <img src="/picnic.svg" alt="picnic" style={iconStyle} />
+            </div>
         );
-      };
+    };
 
     const convertToFahrenheit = (tempCelsius) => (tempCelsius * 9/5) + 32;
 
@@ -176,6 +287,8 @@ function Home() {
                 return 'url(/images/light-intensity-drizzle-rain.jpg)';
             case 'fog':
                 return 'url(/images/fog.jpg)';
+            case 'light rain':
+                return 'url(/images/light-rain.jpg)';
             default:
                 return 'url(/images/default-weather.jpg)';
         }
@@ -196,12 +309,15 @@ function Home() {
                 {/* Navbar */}
                 <AppBar position="fixed" style={{ width: '100%', top: 0, left: 0, zIndex: 1100 }}>
                         <Toolbar style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                            <FaCloud style={{ marginRight: "4px", fontSize: "3rem" }} /> 
                             <Typography variant="h4">Weather Tracker</Typography>
+                        </div>
                             <div>
                                 <Typography variant="body1" style={{ marginRight: "20px", display: "inline" }}>
                                     👤 {currentUser?.email}
                                 </Typography>
-                                <Button style={{ marginRight: "100px"}} variant="contained" color="error" onClick={handleLogout}>
+                                <Button style={{ marginRight: "100px", fontSize: 20}} variant="outlined" color="white" onClick={handleLogout}>
                                     Logout
                                 </Button>
                                 <Box 
@@ -233,40 +349,66 @@ function Home() {
                     paddingBottom: '40px'
                 }}>
                     {/* City Selection */}
+                    <Typography variant="h4" style={{ margin: "20px 0 20px 0"}}>
+                        Welcome to the Weather Tracker!
+                    </Typography>
+                    <Typography variant="h6" style={{ margin: "20px 0 20px 0"}}>
+                    Stay updated with real-time weather information for your favorite cities around the world. 
+                    Simply select at least three cities, and we'll show you the latest weather data, including temperature, humidity, wind speed, and more. 
+                    You can also switch between Celsius and Fahrenheit, and enjoy personalized weather recommendations based on the conditions.
+                    </Typography>
                     <Typography variant="h5" style={{ margin: "20px 0 20px 0"}}>
                         SELECT AT LEAST 3 CITIES:
                     </Typography>
                     <Grid container spacing={2} style={{ marginBottom: "20px" }}>
-                        {cityOptions.map((city) => (
-                            <Grid item key={city}>
-                                <Chip
-                                    label={city}
-                                    onClick={() => toggleCitySelection(city)}
-                                    color={selectedCities.includes(city) ? "primary" : "default"}
-                                    clickable
+                        {cityOptions.slice(0, showMore ? cityOptions.length : 8).map((city) => (
+                            <Grid item key={city.name} xs={12} sm={6} md={4} lg={3}>
+                                <Card
+                                    onClick={() => toggleCitySelection(city.name)}
                                     sx={{
-                                        fontSize: "1.2rem",  
-                                        padding: "10px",    
-                                        height: "40px",      
-                                        minWidth: "100px",   
+                                        cursor: "pointer",
+                                        transition: "transform 0.2s ease-in-out",
+                                        "&:hover": {
+                                            transform: "scale(1.05)", 
+                                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                                        },
+                                        border: selectedCities.includes(city.name) ? "3px solid #1976d2" : "none",
                                     }}
-                                />
+                                >
+                                    <CardMedia
+                                        component="img"
+                                        height="140"
+                                        image={city.image}
+                                        alt={city.name}
+                                    />
+                                    <CardContent sx={{ textAlign: "center" }}>
+                                        <Typography variant="h6">{city.name}</Typography>
+                                    </CardContent>
+                                </Card>
                             </Grid>
                         ))}
                     </Grid>
+
+                    <Box style={{ display: "flex", justifyContent: "right", marginTop: "20px" }}>
+                        {cityOptions.length > 8 && (
+                            <Button style={{fontSize: 18}} variant="outlined" color="primary" onClick={toggleShowMore}>
+                                {showMore ? "Show Less" : "Show More Cities"}
+                            </Button>
+                        )}
+                    </Box>
 
                     <TextField
                         label="Enter Custom City"
                         variant="outlined"
                         value={cityInput}
                         onChange={handleCityInputChange}
-                        style={{ marginBottom: "10px"}}
+                        style={{ marginBottom: "10px", marginTop: "20px"}}
                     />
                     <Button
-                        variant="contained"
-                        color="secondary"
+                        variant="outlined"
+                        color="primary"
                         onClick={addCustomCity}
-                        style={{ marginBottom: "20px", marginLeft: "10px" }}
+                        style={{ fontSize: 25, marginBottom: "20px", marginLeft: "10px", marginTop: "20px" }}
                     >Add City</Button>
 
                     {/* Show Selected Cities */}
@@ -284,8 +426,8 @@ function Home() {
                                         cursor: "pointer",
                                         transition: "transform 0.2s ease-in-out",
                                         "&:hover": {
-                                            transform: "scale(1.1)", // Enlarges the card on hover
-                                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)", // Adds shadow for effect
+                                            transform: "scale(1.1)", 
+                                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)", 
                                         },
                                         backgroundColor: selectedCities.includes(city) ? "#1976d2" : "#e3f2fd",
                                         color: selectedCities.includes(city) ? "white" : "black",
@@ -299,8 +441,8 @@ function Home() {
                         ))}
                     </Grid>
 
-                    <Box style={{ display: "flex", justifyContent: "center", marginTop: "60px" }}>
-                        <Button variant="contained" color="primary" onClick={fetchWeather}>
+                    <Box style={{display: "flex", justifyContent: "center", marginTop: "60px" }}>
+                        <Button style={{fontSize: 20}}variant="outlined" color="primary" onClick={fetchWeather}>
                             Get Weather
                         </Button>
                     </Box>
@@ -345,7 +487,7 @@ function Home() {
                                     <CardContent style={{ position: 'relative', zIndex: 2 }}>
                                         <Typography variant="h6">{weather.name || weather.city}</Typography>
                                         {weather.error ? (
-                                            <Typography color="error">{weather.error}</Typography>
+                                            <Typography style={fontSize=15} color="error">{weather.error}</Typography>
                                         ) : (
                                             <>
                                                 <Typography>🌡️ Temperature: {temperatureUnit === "metric" 
@@ -364,8 +506,8 @@ function Home() {
 
                                         {/* Floating Recommendation Panel */}
                                         <div style={{
-                                            background: "#ffcc00", color: "#333", padding: "5px 10px",
-                                            borderRadius: "5px", fontSize: "14px", marginTop: "10px"
+                                            background: "#45b6fe", color: "black", padding: "5px 10px",
+                                            borderRadius: "5px", fontSize: "16px", marginTop: "20px", borderColor: "white"
                                         }}>
                                             {getRecommendations(weather)}
                                         </div>
@@ -376,7 +518,7 @@ function Home() {
                     </Grid>
 
                     <Box style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
-                        <Button variant="contained" color="error" onClick={clearSelectedCities}>
+                        <Button style={{fontSize: 20}} variant="outlined" color="error" onClick={clearSelectedCities}>
                             Clear All
                         </Button>
                     </Box>

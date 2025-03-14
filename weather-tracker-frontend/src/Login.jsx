@@ -70,7 +70,8 @@ function Login() {
             )}
             <LoginCard variant="outlined">
                 <CloudIcon  sx={{justifyContent: "center", alignItems:"center", fontSize: 50, color: "#2196F3"}} />
-                <Typography variant = "h4" fontWeight="bold" align="center">Login</Typography>
+                <Typography variant = "h4" fontWeight="bold" align="center">Weather Tracker</Typography>
+                <Typography variant = "h5" fontWeight="bold" align="center">Login</Typography>
                 {error && <Typography color="error">{error}</Typography>}
                 <Box component="form" onSubmit={handleLogin} display="flex" flexDirection="column" gap={2} width="100%">
                     <TextField 
@@ -90,7 +91,7 @@ function Login() {
                         fullWidth 
                     />
                     <Button type="submit" variant="contained" fullWidth>
-                        Login
+                        Log In
                     </Button>
                 </Box>
                 <Divider sx={{ width: "100%" }} />
